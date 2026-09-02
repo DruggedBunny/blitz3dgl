@@ -36,6 +36,7 @@ BOOL DebuggerApp::InitInstance(){
 }
 
 int DebuggerApp::ExitInstance(){
+	prefs.close();
 	main_frame->DestroyWindow();
 	return 0;
 }
