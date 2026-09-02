@@ -67,6 +67,14 @@ gxRuntime *gxRuntime::openRuntime( HINSTANCE hinst,const string &cmd_line,Debugg
 	//create debugger
 	debugger=d;
 
+	//Must happen before the first window is created (RegisterClass/CreateWindowEx
+	//below), or Windows treats the process as DPI-unaware and silently upscales
+	//every window - measured 640x480 request landing as a real 960x720 buffer at
+	//150% scaling. System-DPI-aware (single global scale queried once at startup)
+	//matches this codebase's non-per-monitor-aware pixel/2D assumptions, and
+	//matches the original stock Blitz3D build's own (pre-existing) behavior.
+	SetProcessDPIAware();
+
 	//create WNDCLASS
 	WNDCLASS wndclass;
 	memset(&wndclass,0,sizeof(wndclass));
