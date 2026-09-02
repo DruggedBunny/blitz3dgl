@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <SDL.h>
+
 #if BB_FMOD_ENABLED
 #include "gxaudio.h"
 #endif
@@ -22,6 +24,7 @@ public:
 
 	HWND hwnd;
 	HINSTANCE hinst;
+	SDL_Window *sdl_window;
 
 #if BB_FMOD_ENABLED
 	gxAudio *audio;
@@ -39,7 +42,7 @@ public:
 	struct GfxDriver;
 
 private:
-	gxRuntime( HINSTANCE hinst,const std::string &cmd_line,HWND hwnd );
+	gxRuntime( HINSTANCE hinst,const std::string &cmd_line,HWND hwnd,SDL_Window *sdl_window );
 	~gxRuntime();
 
 	void paint();

@@ -8,6 +8,7 @@ BLITZ3D_INSTALL/bin/debugger.dll
 BLITZ3D_INSTALL/bin/ide.exe
 BLITZ3D_INSTALL/bin/linker.dll
 BLITZ3D_INSTALL/bin/runtime.dll
+BLITZ3D_INSTALL/bin/SDL2.dll
 BLITZ3D_INSTALL/cfg/blitzide.prefs
 BLITZ3D_INSTALL/tmp/*.bb
 

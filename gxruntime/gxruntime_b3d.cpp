@@ -35,8 +35,6 @@ struct gxDll{
 
 static map<string,gxDll*> libs;
 
-static LRESULT CALLBACK windowProc( HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam );
-
 //current gfx mode
 //
 //0=NONE
@@ -56,6 +54,8 @@ static IDirectDrawSurface7 *primSurf;
 static Debugger *debugger;
 
 static set<gxTimer*> timers;
+
+static LRESULT CALLBACK windowProc( HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam );
 
 enum{
 	WM_STOP=WM_APP+1,WM_RUN,WM_END
@@ -93,7 +93,15 @@ gxRuntime *gxRuntime::openRuntime( HINSTANCE hinst,const string &cmd_line,Debugg
 
 	UpdateWindow( hwnd );
 
-	runtime=d_new gxRuntime( hinst,cmd_line,hwnd );
+	//SDL2 wraps our existing Win32 window (rather than creating its own) so
+	//the "Blitz Runtime Class" window class name stays intact - the IDE's
+	//debugger controls (MainFrame::cmdStop/Run/Step in debugger/mainframe.cpp)
+	//find the runtime window cross-process via FindWindow() on that name.
+	//The wrapped SDL_Window is what later milestones use for the GL context.
+	SDL_Init( SDL_INIT_VIDEO );
+	SDL_Window *sdl_window=SDL_CreateWindowFrom( (void*)hwnd );
+
+	runtime=d_new gxRuntime( hinst,cmd_line,hwnd,sdl_window );
 	return runtime;
 }
 
@@ -114,8 +122,8 @@ void gxRuntime::closeRuntime( gxRuntime *r ){
 //////////////////////////
 // RUNTIME CONSTRUCTION //
 //////////////////////////
-gxRuntime::gxRuntime( HINSTANCE hi,const string &cl,HWND hw ):
-		hinst(hi),cmd_line(cl),hwnd(hw),curr_driver(0),enum_all(false),
+gxRuntime::gxRuntime( HINSTANCE hi,const string &cl,HWND hw,SDL_Window *sw ):
+		hinst(hi),cmd_line(cl),hwnd(hw),sdl_window(sw),curr_driver(0),enum_all(false),
 		pointer_visible(true),
 #if BB_FMOD_ENABLED
 		audio(0),
@@ -145,6 +153,8 @@ gxRuntime::~gxRuntime(){
 	timeGetDevCaps( &tc,sizeof(tc) );
 	timeEndPeriod( tc.wPeriodMin );
 	denumGfx();
+	SDL_DestroyWindow( sdl_window );	//releases SDL's wrapper only; doesn't touch the native HWND (see openRuntime)
+	SDL_Quit();
 	DestroyWindow( hwnd );
 	UnregisterClass( "Blitz Runtime Class",hinst );
 

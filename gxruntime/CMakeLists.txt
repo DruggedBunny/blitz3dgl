@@ -65,7 +65,11 @@ target_compile_options(gxruntime PRIVATE /Gz)
 set(LIBS stdutil winmm Ws2_32.lib)
 
 if (BB_BLITZ3D_ENABLED)
-	set(LIBS ${LIBS} freeimage amstrmid dinput8 dxguid ddraw)
+	set(SDL2_ROOT ${CMAKE_SOURCE_DIR}/third_party/SDL2)
+	target_include_directories(gxruntime PUBLIC ${SDL2_ROOT}/include)
+	set(LIBS ${LIBS} freeimage amstrmid dinput8 dxguid ddraw ${SDL2_ROOT}/lib/x86/SDL2.lib)
+	add_custom_command(TARGET gxruntime POST_BUILD VERBATIM
+			COMMAND ${CMAKE_COMMAND} -E copy ${SDL2_ROOT}/lib/x86/SDL2.dll ${CMAKE_SOURCE_DIR}/BLITZ3D_INSTALL/bin/SDL2.dll)
 endif ()
 
 target_link_libraries(gxruntime ${LIBS})

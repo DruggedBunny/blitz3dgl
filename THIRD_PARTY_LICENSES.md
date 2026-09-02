@@ -12,6 +12,7 @@ kept deliberately — see its entry for the reasoning.
 |---|---|---|---|
 | Blitz3D core (compiler, linker, runtime, gxruntime, IDE, debugger) | repo root | zlib/libpng | Yes |
 | [SoLoud](https://github.com/blitz-research/soloud) | fetched at build time via CMake `FetchContent` (`soloud/CMakeLists.txt`), not vendored | zlib/libpng | Yes |
+| [SDL2](https://github.com/libsdl-org/SDL) 2.30.9 | vendored VC devel package, `third_party/SDL2` (license text: `third_party/SDL2/COPYING.txt`) | zlib | Yes |
 | [stb_vorbis](https://github.com/nothings/stb) (Sean Barrett) | bundled inside SoLoud's `src/audiosource/wav/stb_vorbis.c` | Public domain / MIT (dual) | Yes |
 | LibJPEG (IJG) | `freeimage/LibJPEG` | Independent JPEG Group License | Yes |
 | LibPNG | `freeimage/LibPNG` (license text: `freeimage/LibPNG/LICENSE`) | libpng license | Yes |
@@ -34,6 +35,6 @@ becomes a real blocker.
 
 ## Going forward
 
-Anything added later for the SDL2/OpenGL renderer work (SDL2 itself is zlib-licensed; a GL loader
-such as GLAD is public domain/MIT-generated code) should be checked against the policy above before
-it's added, and this table updated to match.
+Anything added later for the OpenGL renderer work (a GL loader such as GLAD is public
+domain/MIT-generated code) should be checked against the policy above before it's added, and this
+table updated to match.
