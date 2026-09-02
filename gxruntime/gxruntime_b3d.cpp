@@ -16,9 +16,6 @@ struct gxRuntime::GfxDriver{
 	D3DDEVICEDESC7 d3d_desc;
 };
 
-static const int static_ws=WS_VISIBLE|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX;
-static const int scaled_ws=WS_VISIBLE|WS_CAPTION|WS_SYSMENU|WS_SIZEBOX|WS_MINIMIZEBOX|WS_MAXIMIZEBOX;
-
 static string app_title;
 static string app_close;
 static gxRuntime *runtime;
@@ -889,34 +886,32 @@ gxGraphics *gxRuntime::openGraphics( int w,int h,int d,int driver,int flags ){
 		if( graphics=openWindowedGraphics( w,h,d,d3d ) ){
 			gfx_mode=(flags & gxGraphics::GRAPHICS_SCALED) ? 1 : 2;
 			auto_suspend=(flags & gxGraphics::GRAPHICS_AUTOSUSPEND) ? true : false;
-			int ws,ww,hh;
+			int ww,hh;
 			if( gfx_mode==1 ){
-				ws=scaled_ws;
 				RECT c_r;
 				GetClientRect( hwnd,&c_r );
 				ww=c_r.right-c_r.left;
 				hh=c_r.bottom-c_r.top;
 			}else{
-				ws=static_ws;
 				ww=w;
 				hh=h;
 			}
 
-			SetWindowLong( hwnd,GWL_STYLE,ws );
+			//SDL subclasses this window (see openRuntime's SDL_CreateWindowFrom) and
+			//fights/clamps size changes made behind its back - a raw MoveWindow here
+			//was observed collapsing the client rect to near-zero - so the resize
+			//and centering go through SDL's own API instead, which it honours
+			//correctly. SDL_SetWindowBordered gives a plain caption but not the
+			//system menu/close box (no WS_SYSMENU), and none of these SDL calls
+			//add WS_VISIBLE for this adopted ("foreign") window - both added back
+			//via raw Win32 calls below.
+			SDL_SetWindowBordered( sdl_window,SDL_TRUE );
+			SDL_SetWindowResizable( sdl_window,gfx_mode==1 ? SDL_TRUE : SDL_FALSE );
+			SDL_SetWindowSize( sdl_window,ww,hh );
+			SDL_SetWindowPosition( sdl_window,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED );
+			SetWindowLong( hwnd,GWL_STYLE,GetWindowLong( hwnd,GWL_STYLE )|WS_SYSMENU|WS_MINIMIZEBOX );
 			SetWindowPos( hwnd,0,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|SWP_FRAMECHANGED );
-
-			RECT w_r,c_r;
-			GetWindowRect( hwnd,&w_r );
-			GetClientRect( hwnd,&c_r );
-			int tw=(w_r.right-w_r.left)-(c_r.right-c_r.left);
-			int th=(w_r.bottom-w_r.top)-(c_r.bottom-c_r.top );
-			int cx=( GetSystemMetrics( SM_CXSCREEN )-ww )/2;
-			int cy=( GetSystemMetrics( SM_CYSCREEN )-hh )/2;
-			POINT zz={0,0};
-			ClientToScreen( hwnd,&zz );
-			int bw=zz.x-w_r.left,bh=zz.y-w_r.top;
-			int wx=cx-bw,wy=cy-bh;if( wy<0 ) wy=0;		//not above top!
-			MoveWindow( hwnd,wx,wy,ww+tw,hh+th,true );
+			ShowWindow( hwnd,SW_SHOW );
 		}
 	}else{
 		backupWindowState();
