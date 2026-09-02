@@ -703,6 +703,7 @@ void MainFrame::build( bool exec,bool publish ){
 	string src=src_file;
 
 	if( !src.size() ){
+		CreateDirectory( (prefs.homeDir+"\\tmp").c_str(),0 );	//ok if it already exists; the ofstream open below will surface any real failure
 		src=prefs.homeDir+"\\tmp\\tmp.bb";
 		int om=ios_base::binary|ios_base::out|ios_base::trunc;
 		ofstream out( src.c_str(),om );
