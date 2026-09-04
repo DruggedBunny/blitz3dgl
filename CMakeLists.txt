@@ -80,6 +80,9 @@ if (BB_BLITZ3D_ENABLED)
     else()
         add_subdirectory(soloud)
     endif()
+	# GL renderer port milestones (standalone smoke tests, not linked into
+	# the real Blitz3D runtime yet) - see gltest/main.cpp.
+	add_subdirectory(gltest)
 elseif(BB_LIBSGD_ENABLED)
 	add_subdirectory(libsgd)
 endif ()
